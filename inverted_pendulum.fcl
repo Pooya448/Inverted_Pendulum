@@ -1,0 +1,136 @@
+FUNCTION_BLOCK Inverted_Pendulum
+
+    VAR_INPUT
+        theta : REAL;
+        theta_dot : REAL;
+        x_dot : REAL;
+        (* other vars iF needed *)
+    END_VAR
+
+    VAR_OUTPUT
+        F : REAL;
+        (* other vars iF needed *)
+    END_VAR
+
+    FUZZIFY theta
+        TERM NVB :=  (0,1) (45,0);
+        TERM NB :=  (40,0) (70,1) (140,0);
+        TERM N :=  (110,0) (165,1) (180,0);
+        TERM Z :=  (170,0) (180,1) (190,0);
+        TERM P :=  (180,0) (195,1) (250,0);
+        TERM PB :=  (220,0) (290,1) (320,0);
+        TERM PVB :=  (315,0) (360,1);
+    END_FUZZIFY
+
+    FUZZIFY theta_dot
+        TERM NB :=  (-8,1) (-3,0);
+        TERM N :=  (-5,0) (-2,1) (0,0);
+        TERM Z :=  (-1,0) (0,1) (1,0);
+        TERM P :=  (0,0) (2,1) (5,0);
+        TERM PB :=  (3,0) (8,1);
+    END_FUZZIFY
+
+    FUZZIFY x_dot
+        TERM NVB := (-80,1) (-60,0);
+        TERM NB := (-60,0) (-40,1) (-20,0);
+        TERM N := (-20,0) (-15,1) (-10,0);
+        TERM Z := (-10,0) (0,1) (10,0);
+        TERM P := (10,0) (15,1) (20,0);
+        TERM PB := (20,0) (40,1) (60,0);
+        TERM PVB := (60,0) (80,1);
+    END_FUZZIFY
+
+    DEFUZZIFY F
+        TERM NVVB :=  (-100,0) (-90,1) (-80,0);
+        TERM NVB :=  (-75,0) (-55,1) (-40,0);
+        TERM NB :=  (-45,0) (-35,1) (-10,0);
+        TERM N :=  (-20,0) (-15,1) (0,0);
+        TERM Z :=  (-10,0) (0,1) (10,0);
+        TERM P :=  (0,0) (15,1) (20,0);
+        TERM PB :=  (10,0) (35,1) (45,0);
+        TERM PVB :=  (40,0) (55,1) (75,0);
+        TERM PVVB :=  (80,0) (90,1) (100,0);
+        ACCU : MAX;
+        METHOD : COG;
+        DEFAULT := 0;
+    END_DEFUZZIFY
+
+    RULEBLOCK Inverted_Pendulum
+        AND : MIN;
+        OR : MAX;
+
+        RULE 1 : IF theta IS PVB AND theta_dot IS PB THEN F IS NVVB;
+        RULE 2 : IF theta IS PVB AND theta_dot IS P THEN F IS NVVB;
+
+        RULE 3 : IF theta IS NVB AND theta_dot IS N THEN F IS PVVB;
+        RULE 4 : IF theta IS NVB AND theta_dot IS NB THEN F IS PVVB;
+
+
+
+
+
+        RULE 5 : IF theta IS P AND theta_dot IS PB THEN F IS NVVB;
+        RULE 6 : IF theta IS P AND theta_dot IS P THEN F IS NVB;
+        RULE 7 : IF theta IS P AND theta_dot IS Z THEN F IS NB;
+        RULE 8 : IF theta IS P AND theta_dot IS N THEN F IS N;
+        RULE 9 : IF theta IS P AND theta_dot IS NB THEN F IS Z;
+
+        RULE 10 : IF theta IS Z AND theta_dot IS PB THEN F IS NVB;
+        RULE 11 : IF theta IS Z AND theta_dot IS P THEN F IS NB;
+        RULE 12 : IF theta IS Z AND theta_dot IS Z THEN F IS Z;
+        RULE 13 : IF theta IS Z AND theta_dot IS N THEN F IS PB;
+        RULE 14 : IF theta IS Z AND theta_dot IS NB THEN F IS PVB;
+
+
+        RULE 15 : IF theta IS N AND theta_dot IS PB THEN F IS Z;
+        RULE 16 : IF theta IS N AND theta_dot IS P THEN F IS P;
+        RULE 17 : IF theta IS N AND theta_dot IS Z THEN F IS PB;
+        RULE 18 : IF theta IS N AND theta_dot IS N THEN F IS PVB;
+        RULE 19 : IF theta IS N AND theta_dot IS NB THEN F IS PVVB;
+
+
+
+
+
+
+
+
+        RULE 22 : IF theta IS PB OR theta_dot IS NB THEN F IS PB;
+        RULE 23 : IF theta IS PB OR theta_dot IS PB THEN F IS PB;
+
+        RULE 24 : IF theta IS NB OR theta_dot IS NB THEN F IS NB;
+        RULE 25 : IF theta IS NB OR theta_dot IS PB THEN F IS NB;
+
+        RULE 26 : IF x_dot IS N THEN F IS P;
+
+        RULE 27 : IF x_dot IS P THEN F IS N;
+
+
+
+
+        RULE 28 : IF theta IS PVB AND theta_dot IS NB THEN F IS P;
+        RULE 29 : IF theta IS PVB AND theta_dot IS N THEN F IS PB;
+
+        RULE 30 : IF theta IS NVB AND theta_dot IS P THEN F IS NB;
+        RULE 31 : IF theta IS NVB AND theta_dot IS PB  THEN F IS N;
+
+        RULE 32 : IF theta IS NVB AND theta_dot IS Z THEN F IS NVVB;
+        RULE 33 : IF theta IS PVB AND theta_dot IS Z THEN F IS PVVB;
+
+        RULE 34 : IF x_dot IS NB THEN F IS PB;
+
+        RULE 35 : IF x_dot IS PB THEN F IS NB;
+
+        RULE 36 : IF x_dot IS Z THEN F IS Z;
+
+
+
+
+
+
+
+
+
+    END_RULEBLOCK
+
+END_FUNCTION_BLOCK
